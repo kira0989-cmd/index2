@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoWatt - Calculadora Avanzada</title>
+<style>
+  body{font-family: 'Segoe UI', sans-serif; background:#f0f7f4; display:flex; justify-content:center; padding:20px; margin:0;}
+  .card{background:white; max-width:550px; width:100%; border-radius:18px; padding:25px; box-shadow:0 8px 25px rgba(0,0,0,0.1);}
+  h1{text-align:center; color:#2d6a4f; margin-bottom:5px;}
+  .sub{text-align:center; color:#6b6b6b; font-size:14px; margin-bottom:20px;}
+  label{font-weight:600; color:#333; display:block; margin-top:15px; font-size:14px;}
+  select, input{width:100%; padding:12px; margin-top:6px; border-radius:10px; border:1.5px solid #ccc; font-size:15px; box-sizing:border-box;}
+  button{width:100%; margin-top:22px; background:#2d6a4f; color:white; border:none; padding:14px; border-radius:12px; font-size:16px; font-weight:bold; cursor:pointer;}
+  button:hover{background:#1b4332;}
+  #resultado{margin-top:20px; background:#e8f5e9; border-left:5px solid #2d6a4f; padding:15px; border-radius:10px; display:none;}
+  .dato{margin:8px 0;}
+  .total{font-weight:bold; font-size:17px; margin-top:12px; padding-top:10px; border-top:1.5px dashed #2d6a4f;}
+  small{color:#888;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🌱 EcoWatt Pro</h1>
+  <p class="sub">Calcula tu consumo fantasma con magnitudes escalares (Energía, Tiempo, Masa de CO₂ y Dinero)</p>
+
+  <label>1. Selecciona un electrodoméstico:</label>
+  <select id="aparato">
+    <option value="0">-- Elige uno --</option>
+    <option value="1.2">Cargador de celular (1.2 W)</option>
+    <option value="3.0">Consola de Videojuegos - Standby (3.0 W)</option>
+    <option value="4.5">Decodificador de TV por cable (4.5 W)</option>
+    <option value="5.0">Microondas con reloj (5.0 W)</option>
+    <option value="2.5">Televisor LED 32" - Standby (2.5 W)</option>
+    <option value="6.8">Televisor Smart 55" - Standby (6.8 W)</option>
+    <option value="1.5">Laptop cerrada / en reposo (1.5 W)</option>
+    <option value="3.5">Computadora de escritorio - Apagada (3.5 W)</option>
+    <option value="8.0">Equipo de sonido / Bocina (8.0 W)</option>
+    <option value="2.2">Impresora (2.2 W)</option>
+    <option value="4.0">Router WiFi (4.0 W) - 24h</option>
+    <option value="1.8">Horno eléctrico con reloj (1.8 W)</option>
+    <option value="3.2">Cafetera eléctrica (3.2 W)</option>
+    <option value="1.0">Cargador de laptop sin laptop (1.0 W)</option>
+    <option value="5.5">Aire Acondicionado - Standby (5.5 W)</option>
+    <option value="7.5">Lavadora moderna - Standby (7.5 W)</option>
+    <option value="2.8">Monitor de PC (2.8 W)</option>
+    <option value="9.0">Consola + TV + Bocinas (combo gamer) (9.0 W)</option>
+  </select>
+
+  <label>2. ¿Cuántas horas al día queda inactivo / en standby? <small>(Tiempo)</small></label>
+  <input type="number" id="horas" value="18" min="1" max="24">
+
+  <label>3. ¿Cuántos días al mes lo dejas conectado?</label>
+  <input type="number" id="dias" value="30" min="1" max="31">
+
+  <label>4. ¿Cuántos aparatos iguales tienes en casa?</label>
+  <input type="number" id="cantidad" value="1" min="1" max="20">
+
+  <label>5. Precio de 1 kWh en tu recibo (Q) <small>En Guate aprox Q1.15</small></label>
+  <input type="number" id="precio" value="1.15" step="0.01">
+
+  <button onclick="calcular()">Calcular Impacto Global</button>
+
+  <div id="resultado"></div>
+</div>
+
+<script>
+function calcular(){
+  const potencia = parseFloat(document.getElementById('aparato').value);
+  const horas = parseFloat(document.getElementById('horas').value);
+  const dias = parseFloat(document.getElementById('dias').value);
+  const cantidad = parseFloat(document.getElementById('cantidad').value);
+  const precioKwh = parseFloat(document.getElementById('precio').value);
+
+  if(potencia === 0){ alert("Por favor selecciona un electrodoméstico"); return; }
+
+  // Magnitudes escalares
+  // Energía (kWh) = Potencia (W) * Tiempo (h) / 1000
+  const energiaDiaria = (potencia * horas * cantidad) / 1000; // kWh dia
+  const energiaMensual = energiaDiaria * dias;
+
+  // Masa CO2: Factor Guatemala ~0.4 kg CO2 por kWh (según CNEE)
+  const factorCO2 = 0.4;
+  const co2Evitado = energiaMensual * factorCO2;
+
+  // Dinero ahorrado
+  const dinero = energiaMensual * precioKwh;
+
+  // Tiempo equivalente perdido al año
+  const energiaAnual = energiaMensual * 12;
+
+  document.getElementById('resultado').style.display = 'block';
+  document.getElementById('resultado').innerHTML = `
+    <div class="dato">🔌 <b>Aparatos calculados:</b> ${cantidad} x ${(potencia).toFixed(1)} W</div>
+    <div class="dato">⚡ <b>Energía desperdiciada al mes:</b> ${energiaMensual.toFixed(2)} kWh <small>(Magnitud Escalar: Energía)</small></div>
+    <div class="dato">🌫️ <b>Huella de Carbono evitada:</b> ${co2Evitado.toFixed(2)} kg de CO₂ <small>(Magnitud Escalar: Masa)</small></div>
+    <div class="dato">💰 <b>Dinero ahorrado al mes:</b> Q${dinero.toFixed(2)} / $${(dinero*0.13).toFixed(2)} USD</div>
+    <div class="total">
+      💡 Si desconectas esto 1 año: <br>
+      - Ahorras ${energiaAnual.toFixed(1)} kWh <br>
+      - Evitas ${ (co2Evitado*12).toFixed(1)} kg de CO₂ (como sembrar ${(co2Evitado*12/20).toFixed(1)} árboles) <br>
+      - Ahorras Q${(dinero*12).toFixed(2)} al año
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
